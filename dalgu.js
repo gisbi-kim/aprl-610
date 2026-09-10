@@ -8,7 +8,7 @@ function createDalgu(){
   function ball(parent,name,p,s,m){const mesh=new T.Mesh(new T.SphereGeometry(1,32,24),m);mesh.name=name;mesh.position.set(...p);mesh.scale.set(...s);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
   function line(parent,points,r,m){const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const mesh=new T.Mesh(new T.TubeGeometry(curve,24,r,8,false),m);parent.add(mesh);return mesh;}
   ball(root,'Body',[0,.43,0],[.255,.31,.18],blue);
-  ball(root,'Belly',[0,.43,.19],[.145,.22,.035],cream);
+  ball(root,'Belly',[0,.46,.23],[.19,.20,.035],cream);
   const legs=[];for(const sign of [-1,1])legs.push(ball(root,'Foot',[sign*.12,.12,.035],[.105,.12,.15],blue));
   const tail=ball(root,'Tail',[-.12,.18,-.22],[.13,.055,.27],blue);tail.rotation.y=-.45;
   const head=new T.Group();head.name='Head';root.add(head);
@@ -30,13 +30,15 @@ function createDalgu(){
   ball(head,'Nose',[0,.839,.292],[.045,.025,.019],black);
   
   
-  line(head,[[-.118,.785,.279],[-.079,.766,.294],[0,.795,.306],[.079,.766,.294],[.118,.785,.279]],.006,black);
+  ball(head,'Smile opening',[0,.756,.293],[.038,.040,.012],black);
+  ball(head,'Tongue',[0,.750,.305],[.026,.025,.007],pink);
+  line(head,[[-.118,.806,.282],[-.095,.778,.294],[-.045,.779,.302],[0,.800,.310],[.045,.779,.302],[.095,.778,.294],[.118,.806,.282]],.006,black);
   line(head,[[-.018,1.16,0],[-.027,1.20,0],[-.045,1.22,0]],.006,black);
   line(head,[[.018,1.16,0],[.028,1.21,0],[.045,1.23,0]],.006,black);
   const arms=[];for(const sign of [-1,1]){const arm=new T.Group();arm.position.set(sign*.20,.59,0);root.add(arm);const hand=ball(arm,'Arm',[sign*.095,-.035,.01],[.16,.075,.085],blue);hand.rotation.z=-sign*.3;arms.push(arm);}
-  line(root,[[-.19,.67,.12],[-.13,.50,.195],[.03,.34,.19],[.24,.27,.06]],.028,white);
+  line(root,[[-.19,.67,.205],[-.13,.50,.26],[.03,.34,.275],[.24,.27,.16]],.028,white);
   ball(root,'White bag',[.22,.29,.09],[.12,.115,.083],white);
-  for(const [x,y] of [[-.025,.425],[.055,.39]]){const ring=new T.Mesh(new T.TorusGeometry(.045,.013,10,32),white);ring.position.set(x,y,.222);ring.rotation.z=-.5;root.add(ring);}
+  for(const [x,y] of [[-.025,.425],[.055,.39]]){const ring=new T.Mesh(new T.TorusGeometry(.045,.013,10,32),white);ring.position.set(x,y,.282);ring.rotation.z=-.5;root.add(ring);}
   const fish=new T.Group();fish.position.set(-.43,.64,.04);fish.rotation.z=-.12;arms[0].add(fish);fish.position.sub(arms[0].position);
   ball(fish,'Fish',[0,0,0],[.13,.082,.044],gold);
   for(const y of [-.04,.04]){const fin=ball(fish,'Fish tail',[.13,y,0],[.055,.048,.025],gold);fin.rotation.z=y>0?.6:-.6;}
@@ -54,7 +56,7 @@ function createDalgu(){
   body.scale.setScalar(bodyScale);body.position.y=-bodyBounds.min.y*bodyScale;
   // The reference has no exposed neck: shoulders continue inside the lower head.
   // This hidden overlap keeps the visible 0.5 m head / 0.5 m body split without tangent-only contact.
-  const torso=root.getObjectByName('Body');torso.scale.y*=1.35;torso.position.y+=.31*.35;
+  const torso=root.getObjectByName('Body');torso.scale.set(.34,.35,.22);torso.position.y=.59;
   const eyeHeight=.5+(.948-headBounds.min.y)*headScale;
   return {root,head,legs,arms,eyeHeight};
 }
