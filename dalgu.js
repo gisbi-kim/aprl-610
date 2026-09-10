@@ -36,19 +36,30 @@ function createDalgu(){
   for(const y of [-.04,.04]){const fin=ball(fish,'Fish tail',[.13,y,0],[.055,.048,.025],gold);fin.rotation.z=y>0?.6:-.6;}
   ball(fish,'Fish eye',[-.077,.025,.04],[.009,.009,.005],black);
   for(const x of [-.025,.025,.07])line(fish,[[x,-.035,.041],[x+.015,0,.047],[x,.035,.041]],.004,black);
-  root.scale.setScalar(1.2/1.236);
-  return {root,head,legs,arms};
+  // Each section occupies exactly 0.5 m in the neutral pose, including ears/hair.
+  const body=new T.Group();body.name='BodySection';
+  for(const child of [...root.children])if(child!==head)body.add(child);
+  root.add(body);
+  const headBounds=new T.Box3().setFromObject(head),bodyBounds=new T.Box3().setFromObject(body);
+  const headScale=.5/(headBounds.max.y-headBounds.min.y),bodyScale=.5/(bodyBounds.max.y-bodyBounds.min.y);
+  const headContent=new T.Group();headContent.name='HeadGeometry';
+  for(const child of [...head.children])headContent.add(child);
+  head.add(headContent);headContent.scale.setScalar(headScale);headContent.position.y=-headBounds.min.y*headScale;head.position.y=.5;
+  body.scale.setScalar(bodyScale);body.position.y=-bodyBounds.min.y*bodyScale;
+  const eyeHeight=.5+(.908-headBounds.min.y)*headScale;
+  return {root,head,legs,arms,eyeHeight};
 }
 
 export function installDalgu(viewer){
   const {scene,camera,controls,renderer}=viewer;
   const avatar=createDalgu();scene.add(avatar.root);
   const panel=document.createElement('section');panel.id='dalguPanel';
-  panel.innerHTML='<hr><div class="label">달구와 산책</div><div class="dalgu-buttons"><button id="dalguEyes">달구 시점</button><button id="dalguFollow">따라가기</button><button id="dalguExit" hidden>둘러보기로</button></div><label for="dalguHeight">키 <input id="dalguHeight" type="range" min="1" max="1.5" step="0.1" value="1.2"><output id="dalguHeightValue">1.2 m</output></label><p id="dalguHelp">WASD · 방향키 이동<br>화면 클릭 후 마우스로 시선 조절 · Esc 해제</p><button id="dalguReset" class="wide">달구 위치 초기화</button>';
+  panel.innerHTML='<hr><div class="label">달구와 산책</div><div class="dalgu-buttons"><button id="dalguEyes">달구 시점</button><button id="dalguFollow">따라가기</button><button id="dalguExit" hidden>둘러보기로</button></div><p id="dalguSize">키 1.0 m</p><p id="dalguHelp">WASD · 방향키 이동<br>화면 클릭 후 마우스로 시선 조절 · Esc 해제</p><button id="dalguReset" class="wide">달구 위치 초기화</button>';
   document.querySelector('aside').append(panel);
-  const style=document.createElement('style');style.textContent='#dalguPanel{grid-column:1/-1}#dalguPanel .label{margin-top:12px}.dalgu-buttons{display:flex;gap:6px;flex-wrap:wrap}.dalgu-buttons button{flex:1;white-space:nowrap}#dalguPanel label{gap:6px;margin:12px 0}#dalguHeight{width:90px;flex:1}#dalguHeightValue{white-space:nowrap}#dalguHelp{font-size:11px;line-height:1.7;color:#738479}body.dalgu-walk #viewNavigator,body.dalgu-walk .views{opacity:.5}';document.head.append(style);
+  const style=document.createElement('style');style.textContent='#dalguPanel{grid-column:1/-1}#dalguPanel .label{margin-top:12px}.dalgu-buttons{display:flex;gap:6px;flex-wrap:wrap}.dalgu-buttons button{flex:1;white-space:nowrap}#dalguSize{font-size:11px;color:#738479;margin:12px 0}#dalguHelp{font-size:11px;line-height:1.7;color:#738479}body.dalgu-walk #viewNavigator,body.dalgu-walk .views{opacity:.5}';document.head.append(style);
   const $=id=>document.getElementById(id),keys=new Set();
-  let active=false,follow=false,yaw=0,pitch=0,height=1.2,phase=0,saved=null,drag=null;
+  let active=false,follow=false,yaw=0,pitch=0,phase=0,saved=null,drag=null;
+  const height=1.0;
   const radius=.22,position=new T.Vector3(),boxes=[];
   viewer.cute.updateMatrixWorld(true);
   viewer.cute.traverse(o=>{if(!o.isMesh)return;const b=new T.Box3().setFromObject(o);
@@ -64,14 +75,13 @@ export function installDalgu(viewer){
   function viewUpdate(){avatar.root.position.copy(position);avatar.root.rotation.y=yaw+Math.PI;
     avatar.root.visible=!active||follow;avatar.head.rotation.x=-pitch*.35;
     if(!active)return;camera.fov=75;camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);
-    camera.position.copy(position).add(new T.Vector3(0,height*.735,0));
+    camera.position.copy(position).add(new T.Vector3(0,avatar.eyeHeight,0));
     if(follow){const target=camera.position.clone();const offset=new T.Vector3(0,.42,1.8).applyAxisAngle(new T.Vector3(0,1,0),yaw);const ray=new T.Raycaster(target,offset.clone().normalize(),0,offset.length());const hits=ray.intersectObject(viewer.cute,true);const dist=hits.length?Math.max(.12,hits[0].distance-.12):offset.length();camera.position.addScaledVector(offset.normalize(),dist);camera.lookAt(target);}
     camera.updateProjectionMatrix();
   }
   function enter(third=false){if(!active){saved={pos:camera.position.clone(),target:controls.target.clone(),fov:camera.fov};controls.enabled=false;active=true;}follow=third;keys.clear();document.body.classList.add('dalgu-walk');$('dalguExit').hidden=false;$('dalguEyes').classList.toggle('active',!third);$('dalguFollow').classList.toggle('active',third);viewUpdate();}
   function exit(){if(!active)return;active=false;keys.clear();if(document.pointerLockElement===renderer.domElement)document.exitPointerLock();controls.enabled=true;camera.position.copy(saved.pos);controls.target.copy(saved.target);camera.fov=saved.fov;camera.updateProjectionMatrix();controls.update();avatar.root.visible=true;document.body.classList.remove('dalgu-walk');$('dalguExit').hidden=true;$('dalguEyes').classList.remove('active');$('dalguFollow').classList.remove('active');}
   $('dalguEyes').onclick=()=>enter(false);$('dalguFollow').onclick=()=>enter(true);$('dalguExit').onclick=exit;$('dalguReset').onclick=()=>{reset();viewUpdate();};
-  $('dalguHeight').oninput=e=>{height=Number(e.target.value);avatar.root.scale.setScalar(height/1.236);$('dalguHeightValue').textContent=height.toFixed(1)+' m';if(blocked(position.x,position.z))reset();viewUpdate();};
   document.querySelectorAll('[data-view],#viewPrevious,#viewNext').forEach(b=>b.addEventListener('click',exit,{capture:true}));
   const moving=['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowLeft','ArrowDown','ArrowRight'];
   window.addEventListener('keydown',e=>{if(!active||e.target.closest?.('input,button,select,textarea'))return;if(moving.includes(e.code)){e.preventDefault();keys.add(e.code);}});
