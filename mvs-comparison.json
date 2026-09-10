@@ -1,0 +1,33 @@
+{
+  "method": "Existing 1600px COLMAP geometric depth maps, new fusion only; no new SfM or high-resolution PatchMatch run.",
+  "settings": {
+    "balanced": {
+      "depth": 0.01,
+      "reprojection": 2,
+      "normal": 15
+    },
+    "complete": {
+      "depth": 0.02,
+      "reprojection": 3,
+      "normal": 20
+    }
+  },
+  "metrics": {
+    "baseline": {
+      "raw": 986403,
+      "clean": 959090,
+      "occupied_3cm_voxels": 69503
+    },
+    "balanced": {
+      "raw": 1011157,
+      "clean": 977106,
+      "occupied_3cm_voxels": 74707
+    },
+    "complete": {
+      "raw": 929731,
+      "clean": 894938,
+      "occupied_3cm_voxels": 77774
+    }
+  },
+  "metric_note": "Occupied 3 cm voxel count measures spatial extent, not accuracy or percentage of holes filled."
+}

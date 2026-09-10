@@ -38,3 +38,12 @@ The character is hidden in first person to avoid the face obscuring the camera.
 
 To continue on another computer, clone this repository, serve it with Python as above,
 and edit `dalgu.js`, `viewer.js`, or `index.html`. Pushing main updates GitHub Pages.
+
+## MVS fusion comparison
+The MVS selector preserves original mvs.glb and compares mvs-balanced.glb
+(default for MVS) and mvs-complete.glb. Both reuse 24 camera poses and 1600px
+geometric depth maps. Only fusion tolerances change, followed by the same crop,
+neighborhood cleanup, Poisson depth 10/trim 7, distance filtering 0.14,
+300000-face simplification and photo texturing. See mvs-comparison.json.
+More occupied voxels do not imply accurate new surfaces. Large wall/floor gaps
+remain. No higher-resolution PatchMatch run was made.
