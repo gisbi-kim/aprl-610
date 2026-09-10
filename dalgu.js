@@ -7,23 +7,29 @@ function createDalgu(){
   const blue=mat('#7893d0'),cream=mat('#fff2d8'),black=mat('#18212a'),white=mat('#ffffff'),pink=mat('#ed93ad'),gold=mat('#f2cf60');
   function ball(parent,name,p,s,m){const mesh=new T.Mesh(new T.SphereGeometry(1,32,24),m);mesh.name=name;mesh.position.set(...p);mesh.scale.set(...s);mesh.castShadow=true;mesh.receiveShadow=true;parent.add(mesh);return mesh;}
   function line(parent,points,r,m){const curve=new T.CatmullRomCurve3(points.map(p=>new T.Vector3(...p)));const mesh=new T.Mesh(new T.TubeGeometry(curve,24,r,8,false),m);parent.add(mesh);return mesh;}
-  ball(root,'Body',[0,.43,0],[.23,.31,.165],blue);
-  ball(root,'Belly',[0,.43,.155],[.145,.22,.035],cream);
+  ball(root,'Body',[0,.43,0],[.255,.31,.18],blue);
+  ball(root,'Belly',[0,.43,.19],[.145,.22,.035],cream);
   const legs=[];for(const sign of [-1,1])legs.push(ball(root,'Foot',[sign*.12,.12,.035],[.105,.12,.15],blue));
   const tail=ball(root,'Tail',[-.12,.18,-.22],[.13,.055,.27],blue);tail.rotation.y=-.45;
   const head=new T.Group();head.name='Head';root.add(head);
-  ball(head,'Head blue',[0,.88,0],[.335,.295,.235],blue);
-  for(const sign of [-1,1]){ball(head,'Ear',[sign*.26,1.07,-.025],[.075,.079,.052],blue);ball(head,'Inner ear',[sign*.26,1.072,.017],[.038,.044,.012],cream);}
-  ball(head,'Muzzle',[0,.78,.13],[.323,.139,.16],cream);
+  ball(head,'Head blue',[0,.88,0],[.37,.295,.215],blue);
+  for(const sign of [-1,1]){ball(head,'Ear',[sign*.26,1.07,-.025],[.075,.079,.052],blue);ball(head,'Inner ear',[sign*.26,1.072,.017],[.038,.044,.012],blue);}
+  const muzzle=ball(head,'Muzzle',[0,.775,.125],[.36,.15,.165],cream);
+  // Broad, softly squared cream cheeks rather than a projecting oval snout.
+  const cheekPositions=muzzle.geometry.attributes.position;
+  for(let i=0;i<cheekPositions.count;i++){
+    for(const axis of ['X','Y']){const v=cheekPositions['get'+axis](i);cheekPositions['set'+axis](i,Math.sign(v)*Math.pow(Math.abs(v),.65));}
+  }
+  muzzle.geometry.computeVertexNormals();
   for(const sign of [-1,1]){
-    ball(head,'Eye',[sign*.137,.908,.214],[.036,.041,.025],black);
-    ball(head,'Eye sparkle',[sign*.137-.009,.922,.237],[.010,.011,.004],white);
+    ball(head,'Eye',[sign*.137,.948,.214],[.036,.041,.025],black);
+    ball(head,'Eye sparkle',[sign*.137-.009,.962,.237],[.010,.011,.004],white);
     const brow=ball(head,'Eyebrow',[sign*.12,.993,.212],[.034,.019,.012],cream);brow.rotation.z=sign*.3;
     for(const k of [-1,1])line(head,[[sign*.22,.81+k*.014,.272],[sign*.279,.812+k*.027,.242]],.006,black);
   }
   ball(head,'Nose',[0,.839,.292],[.045,.025,.019],black);
-  ball(head,'Mouth',[0,.751,.286],[.042,.047,.012],black);
-  ball(head,'Tongue',[0,.741,.299],[.027,.03,.008],pink);
+  
+  
   line(head,[[-.118,.785,.279],[-.079,.766,.294],[0,.795,.306],[.079,.766,.294],[.118,.785,.279]],.006,black);
   line(head,[[-.018,1.16,0],[-.027,1.20,0],[-.045,1.22,0]],.006,black);
   line(head,[[.018,1.16,0],[.028,1.21,0],[.045,1.23,0]],.006,black);
@@ -46,7 +52,10 @@ function createDalgu(){
   for(const child of [...head.children])headContent.add(child);
   head.add(headContent);headContent.scale.setScalar(headScale);headContent.position.y=-headBounds.min.y*headScale;head.position.y=.5;
   body.scale.setScalar(bodyScale);body.position.y=-bodyBounds.min.y*bodyScale;
-  const eyeHeight=.5+(.908-headBounds.min.y)*headScale;
+  // The reference has no exposed neck: shoulders continue inside the lower head.
+  // This hidden overlap keeps the visible 0.5 m head / 0.5 m body split without tangent-only contact.
+  const torso=root.getObjectByName('Body');torso.scale.y*=1.35;torso.position.y+=.31*.35;
+  const eyeHeight=.5+(.948-headBounds.min.y)*headScale;
   return {root,head,legs,arms,eyeHeight};
 }
 
@@ -88,7 +97,7 @@ export function installDalgu(viewer){
     avatar.root.position.copy(position);return !!best;
   }
   function viewUpdate(){avatar.root.position.copy(position);avatar.root.rotation.y=yaw+Math.PI;
-    avatar.root.visible=!active||follow;avatar.head.rotation.x=-pitch*.35;
+    avatar.root.visible=!active||follow;avatar.head.rotation.x=0;
     if(!active)return;camera.fov=75;camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0);
     camera.position.copy(position).add(new T.Vector3(0,avatar.eyeHeight,0));
     if(follow){const target=camera.position.clone();const offset=new T.Vector3(0,.42,1.8).applyAxisAngle(new T.Vector3(0,1,0),yaw);const ray=new T.Raycaster(target,offset.clone().normalize(),0,offset.length());const hits=ray.intersectObject(viewer.cute,true);const dist=hits.length?Math.max(.12,hits[0].distance-.12):offset.length();camera.position.addScaledVector(offset.normalize(),dist);camera.lookAt(target);}

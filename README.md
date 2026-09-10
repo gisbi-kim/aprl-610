@@ -24,7 +24,7 @@ A procedural 3D interpretation of Dalgu is defined in `dalgu.js` (no reference i
 Select 달구 시점 for first person or 따라가기 to see the character from behind.
 WASD / arrow keys move relative to heading; click the canvas to capture the mouse,
 then move it to look around. Escape releases the mouse. Drag-to-look works when
-pointer lock is unavailable. Character height is fixed at 1.0 metre. Head (including ears/hair) and the remaining body each occupy 0.5 metre in the neutral pose.
+pointer lock is unavailable. Character height is fixed at 1.0 metre. The visible head/body split is 0.5 m / 0.5 m. The torso extends inside the head to keep the neck concealed; mouse look turns the camera without tilting the head separately.
 둘러보기로 returns to the previous orbit view; the reset button restores a clear spawn.
 
 Movement uses a fixed-height circle against individual furniture mesh bounds and room
