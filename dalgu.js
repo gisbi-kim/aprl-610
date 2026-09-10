@@ -69,8 +69,23 @@ export function installDalgu(viewer){
   function blocked(x,z){if(x< -1.98+radius||x>1.98-radius||z< -2.57+radius||z>2.9-radius)return true;
     return boxes.some(b=>b.min.y<height&&b.max.y>.09&&Math.hypot(x-T.MathUtils.clamp(x,b.min.x,b.max.x),z-T.MathUtils.clamp(z,b.min.z,b.max.z))<radius);
   }
-  function reset(){let best=null;for(let z=2.4;z> -2.3;z-=.12)for(let x=-1.6;x<1.7;x+=.12){if(!blocked(x,z)){const score=x*x+(z-1.8)**2;if(!best||score<best.score)best={x,z,score};}}
-    if(best)position.set(best.x,.016,best.z);yaw=0;pitch=0;avatar.root.position.copy(position);return !!best;
+  function reset(){
+    keys.clear();yaw=0;pitch=0;phase=0;
+    avatar.head.rotation.x=0;avatar.legs.forEach(o=>o.rotation.x=0);avatar.arms.forEach(o=>o.rotation.x=0);
+    avatar.root.position.set(0,.016,0);avatar.root.rotation.y=Math.PI;
+    avatar.root.updateMatrixWorld(true);
+    // Include head, tail, arms and fish, plus room to start walking.
+    const footprint=new T.Box3().setFromObject(avatar.root);
+    footprint.min.x-=.10;footprint.max.x+=.10;footprint.min.z-=.10;footprint.max.z+=.10;
+    let best=null;
+    for(let z=2.4;z> -2.3;z-=.06)for(let x=-1.6;x<1.7;x+=.06){
+      const candidate=footprint.clone().translate(new T.Vector3(x,0,z));
+      if(blocked(x,z)||candidate.min.x< -1.98||candidate.max.x>1.98||candidate.min.z< -2.57||candidate.max.z>2.9||boxes.some(b=>b.intersectsBox(candidate)))continue;
+      const score=x*x+(z-1.8)**2;
+      if(!best||score<best.score)best={x,z,score};
+    }
+    if(best)position.set(best.x,.016,best.z);
+    avatar.root.position.copy(position);return !!best;
   }
   function viewUpdate(){avatar.root.position.copy(position);avatar.root.rotation.y=yaw+Math.PI;
     avatar.root.visible=!active||follow;avatar.head.rotation.x=-pitch*.35;
