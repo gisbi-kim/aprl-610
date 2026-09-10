@@ -47,3 +47,17 @@ neighborhood cleanup, Poisson depth 10/trim 7, distance filtering 0.14,
 300000-face simplification and photo texturing. See mvs-comparison.json.
 More occupied voxels do not imply accurate new surfaces. Large wall/floor gaps
 remain. No higher-resolution PatchMatch run was made.
+
+## Hybrid MVS + LingBot comparison
+
+`mvs-hybrid.glb` preserves all 299,999 triangles of the balanced MVS mesh and
+adds 180,000 triangles reconstructed from filtered LingBot predictions.
+24 predicted depth/confidence maps are checked against at least two other
+views; points with repeated contradictions against stable MVS depth are rejected.
+Only missing regions receive new patches. Existing COLMAP images texture the mesh.
+`mvs-hybrid-additions.glb` marks the additions in orange for inspection.
+The hybrid is the default choice within the MVS tab; the page still opens in 3D model mode.
+The original and two fusion variants remain selectable at the same camera pose.
+Full settings and limitations are recorded in `mvs-hybrid-report.json`.
+This is a hybrid learned reconstruction, not a pure MVS result or a measured ground truth.
+Boundary snapping was tested and rejected because it introduced artifacts on curved furniture.

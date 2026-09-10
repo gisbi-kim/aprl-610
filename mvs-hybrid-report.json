@@ -1,0 +1,56 @@
+{
+  "frames": 24,
+  "confidence_threshold": 4.0,
+  "required_other_consistent_views": 2,
+  "consistency_tolerance": "max(0.025 metres, 1.5% camera depth)",
+  "preserves_original_mvs_mesh": true,
+  "consistent_points": 349881,
+  "overlap_before_median_m": 0.0377010791161039,
+  "global_refinement": [
+    [
+      0.9999005940735124,
+      0.013577633448420034,
+      -0.0038012946975492915,
+      -0.015613974891955812
+    ],
+    [
+      -0.013592515611472272,
+      0.9998999454967642,
+      -0.003916952248922748,
+      -0.002475267999857951
+    ],
+    [
+      0.003747731419025836,
+      0.003968232038175682,
+      0.9999851037109017,
+      -0.018490430806408102
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "overlap_after_median_m": 0.03690691310752285,
+  "point_distance_quantiles_m": [
+    0.010281378283493443,
+    0.022996549646703408,
+    0.05012644087474307,
+    0.1284277879430057,
+    0.32658147032874224
+  ],
+  "added_points": 181575,
+  "base_faces": 299999,
+  "added_faces": 180000,
+  "total_faces": 479999,
+  "added_surface_area_m2": 19.496888384791696,
+  "mvs_freespace_rejected": 2735,
+  "mvs_freespace_tolerance": "max(8 cm, 2% depth); reject disagreement in >=2 stable geometric depth maps",
+  "selected_method": "Preserve all balanced-MVS triangles, add multi-view-verified LingBot-supported Poisson patches, retexture with existing photos. No boundary snapping in selected result.",
+  "limitations": [
+    "Learned predicted geometry; multi-view agreement is not ground truth.",
+    "Gaps, seams, noisy surfaces and texture stretching remain.",
+    "Added surface area is mesh area, not unique measured room area."
+  ]
+}
