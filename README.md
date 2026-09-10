@@ -20,11 +20,15 @@ Publish only this directory, not the original reconstruction workspace or privat
 
 ## Dalgu walk mode
 
-A procedural 3D interpretation of Dalgu is defined in `dalgu.js` (no reference image is bundled).
+The user-supplied Dalgu OBJ and PBR maps are converted to `dalgu.glb` with
+embedded diffuse, normal and metallic/roughness textures. The original shape is
+preserved and uniformly scaled to one metre. `dalgu.js` loads this asset.
+The supplied OBJ has no skeleton or animation, so navigation translates/turns
+the character in its supplied pose rather than animating individual limbs.
 Select 달구 시점 for first person or 따라가기 to see the character from behind.
 WASD / arrow keys move relative to heading; click the canvas to capture the mouse,
 then move it to look around. Escape releases the mouse. Drag-to-look works when
-pointer lock is unavailable. Character height is fixed at 1.0 metre. The visible head/body split is 0.5 m / 0.5 m. The torso extends inside the head to keep the neck concealed; mouse look turns the camera without tilting the head separately.
+pointer lock is unavailable. Character height is fixed at 1.0 metre. The supplied proportions are preserved; mouse look turns the camera.
 둘러보기로 returns to the previous orbit view; the reset button restores a clear spawn.
 
 Movement uses a fixed-height circle against individual furniture mesh bounds and room
