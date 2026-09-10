@@ -1,3 +1,4 @@
+import { installDalgu } from './dalgu.js';
 import * as THREE from './vendor/three.module.js';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
@@ -15,10 +16,11 @@ for(const [at,size,col] of [[[0,6,0],[8,.1,8],0xffffff],[[-8,2,0],[.1,9,8],0xf2e
 const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(envScene,.08).texture;pmrem.dispose();
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0xecebe5,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.218;ground.receiveShadow=true;scene.add(ground);
 const loader=new GLTFLoader(),roofClip=new THREE.Plane(new THREE.Vector3(0,-1,0),2.59);
+let dalgu;
 let cute,scan,lingbot,scanPromise,mapPromise,mapMaterial,mapCameraGroup,qualityValues,mode='cute',currentView='all',requestNumber=0;
 const cuteBytes=new Uint8Array(await (await fetch('model.glb')).arrayBuffer());
 function toast(msg){$('#toast').textContent=msg;$('#toast').style.display='block';setTimeout(()=>$('#toast').style.display='none',4500);}
-loader.parse(cuteBytes.buffer,'',g=>{cute=g.scene;cute.traverse(o=>{if(o.isMesh){o.castShadow=!o.name.startsWith('Carpet_');o.receiveShadow=true;if(o.material)o.material.envMapIntensity=.75;}});scene.add(cute);$('#loading').remove();document.querySelectorAll('[data-model]').forEach(b=>b.disabled=false);applyMode('cute');window.viewerReady=true;},e=>{$('#loading').textContent='모델을 열지 못했습니다. 페이지를 새로고침해 주세요.';console.error(e);});
+loader.parse(cuteBytes.buffer,'',g=>{cute=g.scene;cute.traverse(o=>{if(o.isMesh){o.castShadow=!o.name.startsWith('Carpet_');o.receiveShadow=true;if(o.material)o.material.envMapIntensity=.75;}});scene.add(cute);$('#loading').remove();document.querySelectorAll('[data-model]').forEach(b=>b.disabled=false);applyMode('cute');dalgu=installDalgu(window.labViewer);window.labViewer.dalgu=dalgu;window.viewerReady=true;},e=>{$('#loading').textContent='모델을 열지 못했습니다. 페이지를 새로고침해 주세요.';console.error(e);});
 const viewpoints=[...D.cameras].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
 let viewIndex=Math.max(0,viewpoints.findIndex(c=>c.name==='14.jpg'));
 function viewLabel(label){
@@ -91,5 +93,6 @@ $('#cutaway').onchange=()=>{if(mapMaterial)mapMaterial.uniforms.cutRoof.value=$(
 function cutaway(){if(!cute)return;const cut=$('#cutaway').checked,x=camera.position.x,z=camera.position.z;cute.traverse(o=>{const n=o.name;let hide=false;if(cut){if(n.startsWith('Wall_Left'))hide=x<-2.05;if(n.startsWith('Wall_Right'))hide=x>2.04;if(n.startsWith('Wall_Front')||n.startsWith('Wall_DoorHeader')||n.startsWith('Door_'))hide=z>2.96;if(n.startsWith('Window_')&&!n.startsWith('Window_Tree')&&!n.startsWith('Window_Console')&&!n.startsWith('Window_Stool'))hide=z<-2.63;if(n.startsWith('Wall_Window'))hide=z<-2.63;}if(n.startsWith('Wall_')||n.startsWith('Door_')||(n.startsWith('Window_')&&!n.startsWith('Window_Tree')&&!n.startsWith('Window_Console')&&!n.startsWith('Window_Stool')))o.visible=!hide;});}
 function resize(){const mobile=innerWidth<=720,width=mobile?innerWidth:Math.max(300,innerWidth-290),bottom=mobile?innerHeight-$('aside').getBoundingClientRect().top+14:45,top=mobile?91:65,height=Math.max(150,innerHeight-bottom-top);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,bottom,width,height);$('footer').style.bottom=(mobile?bottom+4:24)+'px';}
 window.addEventListener('resize',resize);resize();
-function animate(){requestAnimationFrame(animate);controls.update();cutaway();renderer.render(scene,camera);}animate();
+let lastFrame=performance.now();
+function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastFrame)/1000;lastFrame=now;if(!dalgu?.active)controls.update();dalgu?.tick(dt);cutaway();renderer.render(scene,camera);}animate();
 window.labViewer={scene,camera,renderer,controls,preset,selectModel,get mode(){return mode;},get cute(){return cute;},get scan(){return scan;},get lingbot(){return lingbot;}};
