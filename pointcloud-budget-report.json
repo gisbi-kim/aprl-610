@@ -1,0 +1,111 @@
+{
+  "original_points": 1218336,
+  "voxel_mm": 23,
+  "points": 562913,
+  "bytes": 4846453,
+  "original_bytes": 23148392,
+  "target_bytes": 5000000,
+  "selection": "Highest confidence original sample per occupied voxel",
+  "position_encoding": "uint16 per axis",
+  "rgb": "original uint8 RGB",
+  "confidence_encoding": "uint8 linear",
+  "position_max_error_m": 9.213077099541393e-05,
+  "confidence_max_error": 0.056198954582214355,
+  "trials": [
+    {
+      "voxel_mm": 5,
+      "points": 1190964,
+      "bytes": 9818740
+    },
+    {
+      "voxel_mm": 6,
+      "points": 1171112,
+      "bytes": 9666803
+    },
+    {
+      "voxel_mm": 7,
+      "points": 1146490,
+      "bytes": 9477517
+    },
+    {
+      "voxel_mm": 8,
+      "points": 1117004,
+      "bytes": 9250079
+    },
+    {
+      "voxel_mm": 9,
+      "points": 1083831,
+      "bytes": 8998031
+    },
+    {
+      "voxel_mm": 10,
+      "points": 1048414,
+      "bytes": 8726639
+    },
+    {
+      "voxel_mm": 11,
+      "points": 1011578,
+      "bytes": 8439175
+    },
+    {
+      "voxel_mm": 12,
+      "points": 972113,
+      "bytes": 8128161
+    },
+    {
+      "voxel_mm": 13,
+      "points": 933044,
+      "bytes": 7817783
+    },
+    {
+      "voxel_mm": 14,
+      "points": 893203,
+      "bytes": 7505879
+    },
+    {
+      "voxel_mm": 15,
+      "points": 853459,
+      "bytes": 7187547
+    },
+    {
+      "voxel_mm": 16,
+      "points": 813265,
+      "bytes": 6867707
+    },
+    {
+      "voxel_mm": 17,
+      "points": 773519,
+      "bytes": 6548349
+    },
+    {
+      "voxel_mm": 18,
+      "points": 735205,
+      "bytes": 6242126
+    },
+    {
+      "voxel_mm": 19,
+      "points": 698268,
+      "bytes": 5943050
+    },
+    {
+      "voxel_mm": 20,
+      "points": 662376,
+      "bytes": 5654806
+    },
+    {
+      "voxel_mm": 21,
+      "points": 628170,
+      "bytes": 5378077
+    },
+    {
+      "voxel_mm": 22,
+      "points": 595590,
+      "bytes": 5112583
+    },
+    {
+      "voxel_mm": 23,
+      "points": 562913,
+      "bytes": 4846453
+    }
+  ]
+}

@@ -85,9 +85,7 @@ for(let i=0;i<4;i++)verts.push(...p.toArray(),...corners[i].toArray(),...corners
 const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));return new THREE.LineSegments(geo,new THREE.LineBasicMaterial({color:0xdf9851,transparent:true,opacity:.85,depthTest:true}));}
 async function loadMap(){if(mapPromise)return mapPromise;mapPromise=(async()=>{
 if(!D.lingbot)throw new Error('Pointcloud metadata unavailable');const response=await fetch(D.lingbot.asset);if(!response.ok)throw new Error('Map HTTP '+response.status);
-const buffer=await response.arrayBuffer(),view=new DataView(buffer);if(String.fromCharCode(...new Uint8Array(buffer,0,4))!=='LBM1')throw new Error('Invalid map format');
-const n=view.getUint32(4,true),xyz=new Float32Array(buffer,8,n*3),rgbOffset=8+n*12,rgb=new Uint8Array(buffer,rgbOffset,n*3),qOffset=Math.ceil((rgbOffset+n*3)/4)*4;
-if(buffer.byteLength!==qOffset+n*4)throw new Error('Incomplete map');qualityValues=new Float32Array(buffer,qOffset,n);
+const {decodePointcloud}=await import('./pointcloud-codec.js');const {n,xyz,rgb,quality}=await decodePointcloud(await response.arrayBuffer());qualityValues=quality;
 const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.BufferAttribute(xyz,3));geometry.setAttribute('color',new THREE.BufferAttribute(rgb,3,true));geometry.setAttribute('confidence',new THREE.BufferAttribute(qualityValues,1));geometry.computeBoundingSphere();
 mapMaterial=new THREE.ShaderMaterial({vertexColors:true,uniforms:{threshold:{value:6.5},pointSize:{value:3.5},pixelRatio:{value:renderer.getPixelRatio()},cutRoof:{value:$('#cutaway').checked?1:0}},vertexShader:`
 attribute float confidence; varying vec3 vColor; varying float vConfidence; varying float vHeight; uniform float pointSize; uniform float pixelRatio;
