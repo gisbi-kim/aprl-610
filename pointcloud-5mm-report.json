@@ -1,0 +1,10 @@
+{
+  "voxel_size_m": 0.005,
+  "selection": "Highest confidence sample per occupied voxel, stable input order tie-break",
+  "original_points": 1218336,
+  "points": 1190964,
+  "removed": 27372,
+  "original_bytes": 23148392,
+  "bytes": 22628324,
+  "positions_colors_confidences_preserved": true
+}
