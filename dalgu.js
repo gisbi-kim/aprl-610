@@ -27,8 +27,14 @@ export async function installDalgu(viewer){
     // Ignore floor coverings and geometry above Dalgu. Individual mesh bounds keep passages open.
     if(b.max.y>.09&&b.min.y<1.5&&!/Floor|Carpet|Plinth|Ceiling/i.test(o.name))boxes.push(b);
   });
-  function blocked(x,z){if(x< -1.98+radius||x>1.98-radius||z< -2.57+radius||z>2.9-radius)return true;
-    return boxes.some(b=>b.min.y<height&&b.max.y>.09&&Math.hypot(x-T.MathUtils.clamp(x,b.min.x,b.max.x),z-T.MathUtils.clamp(z,b.min.z,b.max.z))<radius);
+  function blocked(x,z,feet=position.y){if(x< -1.98+radius||x>1.98-radius||z< -2.57+radius||z>2.9-radius)return true;
+    return boxes.some(b=>b.min.y<feet+height-.025&&b.max.y>feet+.025&&Math.hypot(x-T.MathUtils.clamp(x,b.min.x,b.max.x),z-T.MathUtils.clamp(z,b.min.z,b.max.z))<radius);
+  }
+  function overlapsFootprint(box){return Math.hypot(position.x-T.MathUtils.clamp(position.x,box.min.x,box.max.x),position.z-T.MathUtils.clamp(position.z,box.min.z,box.max.z))<radius;}
+  function supportHeight(feet){
+    let top=groundY;
+    for(const box of boxes)if(box.max.y<=feet+.025&&overlapsFootprint(box))top=Math.max(top,box.max.y+groundY);
+    return top;
   }
   function reset(){
     keys.clear();yaw=0;pitch=0;phase=0;verticalSpeed=0;jumpCount=0;
@@ -41,7 +47,7 @@ export async function installDalgu(viewer){
     let best=null;
     for(let z=2.4;z> -2.3;z-=.06)for(let x=-1.6;x<1.7;x+=.06){
       const candidate=footprint.clone().translate(new T.Vector3(x,0,z));
-      if(blocked(x,z)||candidate.min.x< -1.98||candidate.max.x>1.98||candidate.min.z< -2.57||candidate.max.z>2.9||boxes.some(b=>b.intersectsBox(candidate)))continue;
+      if(blocked(x,z,groundY)||candidate.min.x< -1.98||candidate.max.x>1.98||candidate.min.z< -2.57||candidate.max.z>2.9||boxes.some(b=>b.intersectsBox(candidate)))continue;
       const score=x*x+(z-1.8)**2;
       if(!best||score<best.score)best={x,z,score};
     }
@@ -56,7 +62,7 @@ export async function installDalgu(viewer){
     camera.updateProjectionMatrix();
   }
   function enter(third=false){if(!active){saved={pos:camera.position.clone(),target:controls.target.clone(),fov:camera.fov};controls.enabled=false;active=true;}follow=third;keys.clear();$('dalguJump').disabled=false;document.body.classList.add('dalgu-walk');$('dalguExit').hidden=false;$('dalguEyes').classList.toggle('active',!third);$('dalguFollow').classList.toggle('active',third);viewUpdate();}
-  function exit(){if(!active)return;active=false;keys.clear();verticalSpeed=0;jumpCount=0;position.y=groundY;avatar.root.position.copy(position);$('dalguJump').disabled=true;if(document.pointerLockElement===renderer.domElement)document.exitPointerLock();controls.enabled=true;camera.position.copy(saved.pos);controls.target.copy(saved.target);camera.fov=saved.fov;camera.updateProjectionMatrix();controls.update();avatar.root.visible=true;document.body.classList.remove('dalgu-walk');$('dalguExit').hidden=true;$('dalguEyes').classList.remove('active');$('dalguFollow').classList.remove('active');}
+  function exit(){if(!active)return;active=false;keys.clear();verticalSpeed=0;jumpCount=0;position.y=supportHeight(position.y);avatar.root.position.copy(position);$('dalguJump').disabled=true;if(document.pointerLockElement===renderer.domElement)document.exitPointerLock();controls.enabled=true;camera.position.copy(saved.pos);controls.target.copy(saved.target);camera.fov=saved.fov;camera.updateProjectionMatrix();controls.update();avatar.root.visible=true;document.body.classList.remove('dalgu-walk');$('dalguExit').hidden=true;$('dalguEyes').classList.remove('active');$('dalguFollow').classList.remove('active');}
   $('dalguJump').onclick=()=>jump();
   $('dalguEyes').onclick=()=>enter(false);$('dalguFollow').onclick=()=>enter(true);$('dalguExit').onclick=exit;$('dalguReset').onclick=()=>{reset();viewUpdate();};
   document.querySelectorAll('[data-view],#viewPrevious,#viewNext').forEach(b=>b.addEventListener('click',exit,{capture:true}));
@@ -70,12 +76,16 @@ export async function installDalgu(viewer){
   document.addEventListener('mousemove',e=>{if(!active)return;let dx=0,dy=0;if(document.pointerLockElement===renderer.domElement){dx=e.movementX;dy=e.movementY;}else if(drag&&e.buttons){dx=e.clientX-drag[0];dy=e.clientY-drag[1];drag=[e.clientX,e.clientY];}else return;yaw-=dx*.0025;pitch=T.MathUtils.clamp(pitch-dy*.0025,-1.25,1.25);viewUpdate();});
   function tick(dt){if(!active)return;dt=Math.min(dt,.05);let x=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft')),z=Number(keys.has('KeyS')||keys.has('ArrowDown'))-Number(keys.has('KeyW')||keys.has('ArrowUp'));
     const length=Math.hypot(x,z);if(length){const dx=(x*Math.cos(yaw)+z*Math.sin(yaw))/length*.85*dt,dz=(-x*Math.sin(yaw)+z*Math.cos(yaw))/length*.85*dt;const steps=Math.ceil(Math.hypot(dx,dz)/.02);for(let i=0;i<steps;i++){if(!blocked(position.x+dx/steps,position.z))position.x+=dx/steps;if(!blocked(position.x,position.z+dz/steps))position.z+=dz/steps;}phase+=dt*9;}
-    if(jumpCount>0){
-      position.y+=verticalSpeed*dt-.5*gravity*dt*dt;verticalSpeed-=gravity*dt;
-      // Keep the one-metre avatar below the ceiling and above the floor.
-      if(position.y>1.55){position.y=1.55;verticalSpeed=Math.min(0,verticalSpeed);}
-      if(position.y<=groundY){position.y=groundY;verticalSpeed=0;jumpCount=0;}
+    const previousY=position.y;
+    const support=supportHeight(previousY);
+    if(previousY>support+.025&&jumpCount===0)jumpCount=1;
+    position.y+=verticalSpeed*dt-.5*gravity*dt*dt;verticalSpeed-=gravity*dt;
+    if(position.y>previousY){
+      let ceiling=2.55;
+      for(const box of boxes)if(overlapsFootprint(box)&&box.min.y>=previousY+height-.025)ceiling=Math.min(ceiling,box.min.y);
+      if(position.y+height>ceiling){position.y=Math.max(previousY,ceiling-height);verticalSpeed=0;}
     }
+    if(verticalSpeed<=0&&position.y<=support){position.y=support;verticalSpeed=0;jumpCount=0;}
     viewUpdate();
   }
   reset();viewUpdate();

@@ -1,5 +1,5 @@
 import { MeshoptDecoder } from './vendor/meshopt_decoder.mjs';
-import { installDalgu } from './dalgu.js?v=double-jump-1';
+import { installDalgu } from './dalgu.js?v=platform-jump-2';
 import * as THREE from './vendor/three.module.js';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
