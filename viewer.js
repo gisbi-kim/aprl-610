@@ -56,7 +56,7 @@ $('#viewNavigator').onkeydown=e=>{
   if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();selectView(viewIndex+(e.key==='ArrowLeft'?-1:1));}
 };
 controls.addEventListener('start',()=>viewLabel(`자유 시점 · ${viewIndex+1} / ${viewpoints.length}`));
-preset('window');document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>preset(b.dataset.view));
+preset('all');document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>preset(b.dataset.view));
 
 const mvsSaturation={value:1};
 function softenMVS(material){material.onBeforeCompile=shader=>{shader.uniforms.mvsSaturation=mvsSaturation;shader.fragmentShader='uniform float mvsSaturation;\n'+shader.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\nfloat mvsLuma=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));diffuseColor.rgb=mix(vec3(mvsLuma),diffuseColor.rgb,mvsSaturation);');};material.customProgramCacheKey=()=> 'mvs-saturation-v1';}
