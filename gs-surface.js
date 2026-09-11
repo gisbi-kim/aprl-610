@@ -18,7 +18,7 @@ export async function loadSurfaceGS(renderer, camera) {
     renderer.getViewport(viewport);
     dimensions.set(viewport.z, viewport.w);
   };
-  await group.addSplatScene('surface-gs.ply?v=6000', { format: SceneFormat.Ply, showLoadingUI: false, splatAlphaRemovalThreshold: 1 });
+  await group.addSplatScene('surface-gs.ksplat?v=compressed1', { format: SceneFormat.KSplat, showLoadingUI: false, splatAlphaRemovalThreshold: 1 });
   const material = group.splatMesh.material;
   material.uniforms.cutRoof = { value: 1 };
   material.vertexShader = 'uniform float cutRoof;\n' + material.vertexShader.replace(

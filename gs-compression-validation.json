@@ -1,0 +1,26 @@
+[
+  {
+    "name": "rade",
+    "count": 752175,
+    "decodedCount": 752175,
+    "shDegree": 3,
+    "maxPositionErrorMetres": 0.00021053835411077737,
+    "rmsPositionErrorMetres": 0.00012206618337152399
+  },
+  {
+    "name": "pgsr",
+    "count": 485675,
+    "decodedCount": 485675,
+    "shDegree": 3,
+    "maxPositionErrorMetres": 0.00020912674196256234,
+    "rmsPositionErrorMetres": 0.00012208569058435733
+  },
+  {
+    "name": "brush",
+    "count": 436961,
+    "decodedCount": 436961,
+    "shDegree": 2,
+    "maxPositionErrorMetres": 0.0002100914246402298,
+    "rmsPositionErrorMetres": 0.00012205972368269755
+  }
+]

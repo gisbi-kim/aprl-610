@@ -6,13 +6,8 @@
     "coordinates": "viewer Y-up metres",
     "filter_baked": true,
     "label": "RaDe-GS",
-    "parts": [
-      "gs-rade.ply.part0",
-      "gs-rade.ply.part1",
-      "gs-rade.ply.part2"
-    ],
-    "bytes": 186540931,
-    "sha256": "62c4e9abde37e38ccbfd01cb5ee575936dc2b2ada146b47874efb0dff85ecc1a"
+    "bytes": 19173738,
+    "asset": "gs-rade.spz"
   },
   "pgsr": {
     "method": "pgsr",
@@ -21,11 +16,7 @@
     "coordinates": "viewer Y-up metres",
     "filter_baked": false,
     "label": "PGSR",
-    "parts": [
-      "gs-pgsr.ply.part0",
-      "gs-pgsr.ply.part1"
-    ],
-    "bytes": 120448931,
-    "sha256": "f1c7829c59c2e8bbb676e2607f036c893d8969ea071d851a12bbb12bacb05721"
+    "bytes": 13221219,
+    "asset": "gs-pgsr.spz"
   }
 }

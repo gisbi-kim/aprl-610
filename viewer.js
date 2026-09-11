@@ -119,7 +119,7 @@ async function loadBrushGS(){
  gsPromise=(async()=>{
  const {SparkRenderer,SplatMesh,SplatEdit,SplatEditSdf}=await import('./vendor/spark.module.js');
  if(!spark){spark=new SparkRenderer({renderer});scene.add(spark);}
- const loaded=new SplatMesh({url:'lingbot-gs.ply',editable:true,onProgress:e=>{if(requestNumber&&e.total&&mode!=='gs')$('#modelStatus').textContent='GS 불러오는 중… '+Math.round(e.loaded/e.total*100)+'%';}});
+ const loaded=new SplatMesh({url:'gs-brush.spz',editable:true,onProgress:e=>{if(requestNumber&&e.total&&mode!=='gs')$('#modelStatus').textContent='GS 불러오는 중… '+Math.round(e.loaded/e.total*100)+'%';}});
  await loaded.initialized;
  gsRoof=new SplatEditSdf({type:'plane',opacity:0});gsRoof.position.y=2.59;gsRoof.rotation.x=Math.PI/2;
  const edit=new SplatEdit({sdfs:[gsRoof]});loaded.add(edit);edit.add(gsRoof);gsRoof.opacity=$('#cutaway').checked?0:1;
