@@ -2,21 +2,23 @@
   "rade": {
     "method": "rade",
     "iteration": 30000,
-    "gaussians": 752175,
+    "gaussians": 351413,
     "coordinates": "viewer Y-up metres",
     "filter_baked": true,
     "label": "RaDe-GS",
-    "bytes": 19173738,
-    "asset": "gs-rade.spz"
+    "bytes": 9427951,
+    "asset": "gs-rade-half.spz",
+    "compression": "Spatial coverage + opacity/size importance pruning; original SH retained"
   },
   "pgsr": {
     "method": "pgsr",
     "iteration": 30000,
-    "gaussians": 485675,
+    "gaussians": 233124,
     "coordinates": "viewer Y-up metres",
     "filter_baked": false,
     "label": "PGSR",
-    "bytes": 13221219,
-    "asset": "gs-pgsr.spz"
+    "bytes": 6025705,
+    "asset": "gs-pgsr-half.spz",
+    "compression": "Spatial coverage + opacity/size importance pruning; original SH retained"
   }
 }

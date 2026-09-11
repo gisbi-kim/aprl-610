@@ -5,7 +5,7 @@ export async function loadSurfaceGS(renderer, camera) {
   const { DropInViewer, SplatRenderMode, SceneRevealMode, SceneFormat } = await import('./vendor/gaussian-splats-3d.module.js');
   const group = new DropInViewer({
     splatRenderMode: SplatRenderMode.TwoD,
-    sphericalHarmonicsDegree: 2,
+    sphericalHarmonicsDegree: 1,
     sharedMemoryForWorkers: false,
     gpuAcceleratedSort: false,
     integerBasedSort: false,
@@ -18,7 +18,7 @@ export async function loadSurfaceGS(renderer, camera) {
     renderer.getViewport(viewport);
     dimensions.set(viewport.z, viewport.w);
   };
-  await group.addSplatScene('surface-gs.ksplat?v=compressed1', { format: SceneFormat.KSplat, showLoadingUI: false, splatAlphaRemovalThreshold: 1 });
+  await group.addSplatScene('surface-gs-half.ksplat?v=half1', { format: SceneFormat.KSplat, showLoadingUI: false, splatAlphaRemovalThreshold: 1 });
   const material = group.splatMesh.material;
   material.uniforms.cutRoof = { value: 1 };
   material.vertexShader = 'uniform float cutRoof;\n' + material.vertexShader.replace(
