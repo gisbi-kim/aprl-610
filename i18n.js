@@ -2,6 +2,7 @@ const translations = [["모델 비교", "Compare models"], ["3D 모델 선택", 
 // Keep source text per DOM node so live status updates and language changes remain reversible.
 let language = 'en';
 try { language = localStorage.getItem('aprl-language') === 'ko' ? 'ko' : 'en'; } catch {}
+translations.push(['자동 둘러보기 재생','Play auto tour'],['자동 둘러보기 정지','Stop auto tour'],['자동 둘러보기','Auto tour']);
 const sources = new WeakMap();
 const rules = translations.sort((a,b)=>b[0].length-a[0].length);
 function translate(value) { return rules.reduce((s,[ko,en])=>s.split(ko).join(en),value); }

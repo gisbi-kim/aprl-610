@@ -25,10 +25,48 @@ function toast(msg){$('#toast').textContent=msg;$('#toast').style.display='block
 loader.parse(cuteBytes.buffer,'',g=>{cute=g.scene;cute.traverse(o=>{if(o.isMesh){o.castShadow=!o.name.startsWith('Carpet_');o.receiveShadow=true;if(o.material)o.material.envMapIntensity=.75;}});scene.add(cute);$('#loading').remove();document.querySelectorAll('[data-model]').forEach(b=>b.disabled=false);applyMode('cute');installDalgu(window.labViewer).then(d=>{dalgu=d;window.labViewer.dalgu=d;window.viewerReady=true;}).catch(e=>{console.error(e);toast('달구 모델을 불러오지 못했습니다. 새로고침해 주세요.');});},e=>{$('#loading').textContent='모델을 열지 못했습니다. 페이지를 새로고침해 주세요.';console.error(e);});
 const viewpoints=[...D.cameras].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
 let viewIndex=Math.max(0,viewpoints.findIndex(c=>c.name==='14.jpg'));
+let tourPlaying=false,tourElapsed=0,tourDestination=0,tourFromPosition=new THREE.Vector3(),tourFromQuaternion=new THREE.Quaternion(),tourFromFov=36;
+const tourButton=document.createElement('button');tourButton.id='autoTour';tourButton.className='wide';tourButton.textContent='자동 둘러보기 재생';tourButton.setAttribute('aria-pressed','false');
+$('#viewNavigator').after(tourButton);
+function stopTour(){
+ if(!tourPlaying)return;
+ tourPlaying=false;tourButton.textContent='자동 둘러보기 재생';tourButton.setAttribute('aria-pressed','false');controls.enableDamping=true;
+ viewLabel();
+}
+function tourSegment(index){tourDestination=index%viewpoints.length;tourElapsed=0;tourFromPosition.copy(camera.position);tourFromQuaternion.copy(camera.quaternion);tourFromFov=camera.fov;}
+tourButton.onclick=()=>{
+ if(tourPlaying){stopTour();return;}
+ if(viewpoints.length<2)return;
+ dalgu?.exit();controls.enableDamping=false;controls.update();tourPlaying=true;
+ tourButton.textContent='자동 둘러보기 정지';tourButton.setAttribute('aria-pressed','true');
+ document.querySelectorAll('[data-view]').forEach(b=>b.classList.remove('active'));
+ tourSegment(viewIndex);
+};
+controls.addEventListener('start',stopTour);
+document.addEventListener('click',e=>{if(e.target.closest('#dalguEyes,#dalguFollow,#dalguReset'))stopTour();},true);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopTour();});
+window.addEventListener('keydown',e=>{if(e.key==='Escape')stopTour();});
+const tourLook=new THREE.Object3D(),tourTarget=new THREE.Vector3(),tourForward=new THREE.Vector3();
+function tickTour(dt){
+ if(!tourPlaying)return;
+ tourElapsed+=Math.min(dt,.1);
+ const destination=viewpoints[tourDestination],t=Math.min(tourElapsed/6,1),u=t*t*(3-2*t);
+ tourTarget.fromArray(destination.position);tourForward.fromArray(destination.forward).normalize();
+ tourLook.position.copy(tourTarget);tourLook.lookAt(tourTarget.clone().add(tourForward));
+ // Camera faces -Z, whereas Object3D.lookAt faces +Z.
+ tourLook.rotateY(Math.PI);
+ camera.position.lerpVectors(tourFromPosition,tourTarget,u);camera.quaternion.slerpQuaternions(tourFromQuaternion,tourLook.quaternion,u);
+ camera.fov=THREE.MathUtils.lerp(tourFromFov,83,u);camera.updateProjectionMatrix();
+ controls.target.copy(camera.position).add(camera.getWorldDirection(tourForward).multiplyScalar(2));
+ viewLabel(`자동 둘러보기 · View ${tourDestination+1} / ${viewpoints.length}`);
+ if(t>=1){viewIndex=tourDestination;if(tourElapsed>=7)tourSegment(tourDestination+1);}
+}
+
 function viewLabel(label){
   $('#viewPosition').textContent=label||`View ${viewIndex+1} / ${viewpoints.length}`;
 }
 function selectView(index){
+ stopTour();
   viewIndex=(index+viewpoints.length)%viewpoints.length;
   const c=viewpoints[viewIndex];
   const damping=controls.enableDamping;controls.enableDamping=false;controls.update();
@@ -40,6 +78,7 @@ function selectView(index){
   viewLabel();
 }
 function preset(kind){
+ stopTour();
   if(kind==='entry'||kind==='window'){
     selectView(viewpoints.findIndex(c=>c.name===(kind==='entry'?'05.jpg':'14.jpg')));return;
   }
@@ -102,16 +141,18 @@ vec3 linearColor=mix(vColor/12.92,pow((vColor+0.055)/1.055,vec3(2.4)),step(vec3(
 lingbot=new THREE.Group();lingbot.name='Pointcloud';lingbot.add(new THREE.Points(geometry,mapMaterial));mapCameraGroup=cameraMarkers(D.lingbot.cameras);mapCameraGroup.visible=$('#mapCameras').checked;lingbot.add(mapCameraGroup);lingbot.visible=false;scene.add(lingbot);
 $('#confidence').max=Math.ceil(D.lingbot.confidence_quantiles['99']);$('#confidence').value=D.lingbot.default_confidence;updateMapSettings();
 })().catch(e=>{mapPromise=null;throw e;});return mapPromise;}
-let gs,gsPromise,spark,gsRoof,surfaceGS,surfacePromise;let gsVariant='surface';
+let gs,gsPromise,spark,gsRoof,surfaceGS,surfacePromise;let gsVariant='rade';
 const extraGS=new Map(),extraGSPromises=new Map();let extraGSReports={};
 const gsPanel=document.createElement('section');gsPanel.id='gsControls';gsPanel.hidden=true;
 gsPanel.innerHTML='<label for="gsVariant">GS 비교</label><select id="gsVariant" style="width:100%;padding:9px;border:1px solid #dde3de;border-radius:9px;background:#f7f8f4;color:#4e625d"><option value="surface">2DGS · 표면 제약 · 9.4 MB</option><option value="brush">기존 3DGS · Brush · 4.0 MB</option></select><p id="gsStats" style="font-size:12px;line-height:1.6">Gaussian Splatting<br>LingBot 초기화 · 사진 24장<br>6,000단계 · 209,741 splats</p><label>불투명도 <output id="gsOpacityValue">1.0</output><input id="gsOpacity" type="range" min="0.1" max="1" step="0.05" value="1" style="width:100%"></label><p style="font-size:11px;color:#7d8580;line-height:1.6">사진으로 학습한 시각 표현입니다. 빈 영역과 잔상은 남을 수 있으며 충돌용 표면은 아닙니다.</p>';
 document.querySelector('aside').insertBefore(gsPanel,$('#mapControls'));
-fetch('gs-results.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(data=>{extraGSReports=data;for(const [id,report] of Object.entries(data)){const opt=document.createElement('option');opt.value=id;opt.textContent=report.label+" · "+modelSize(report.bytes);$('#gsVariant').appendChild(opt);}}).catch(()=>{});
+const gsReportsReady=fetch('gs-results.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).then(data=>{extraGSReports=data;for(const [id,report] of Object.entries(data)){const opt=document.createElement('option');opt.value=id;opt.textContent=report.label+" · "+modelSize(report.bytes);$('#gsVariant').appendChild(opt);}$('#gsVariant').value=gsVariant;updateTabSize('gs',extraGSReports[gsVariant]?.bytes||modelFileBytes[gsVariant]);}).catch(()=>{});
 $('#gsVariant').onchange=e=>{gsVariant=e.target.value;updateTabSize('gs',modelFileBytes[gsVariant]||extraGSReports[gsVariant]?.bytes);selectModel('gs');};
 function updateGSSettings(){const value=Number($('#gsOpacity').value);if(gs)gs.opacity=value;for(const item of extraGS.values()){item.mesh.opacity=value;item.roof.opacity=$('#cutaway').checked?0:1;}if(surfaceGS)surfaceGS.setAppearance(value,$('#cutaway').checked);}
 $('#gsOpacity').oninput=()=>{updateGSSettings();$('#gsOpacityValue').textContent=Number($('#gsOpacity').value).toFixed(2);};
 async function loadGS(){
+ await gsReportsReady;
+ if(gsVariant==='rade'&&!extraGSReports.rade)throw new Error('RaDe-GS manifest unavailable');
  if(extraGSReports[gsVariant])return loadExtraGS(gsVariant);
  if(gsVariant==='brush')return loadBrushGS();
  if(!surfacePromise)surfacePromise=(async()=>{const {loadSurfaceGS}=await import('./gs-surface.js');surfaceGS=await loadSurfaceGS(renderer,camera);scene.add(surfaceGS);updateGSSettings();})().catch(e=>{surfacePromise=null;throw e;});
@@ -147,5 +188,5 @@ function cutaway(){if(!cute)return;const cut=$('#cutaway').checked,x=camera.posi
 function resize(){const mobile=innerWidth<=720,width=mobile?innerWidth:Math.max(300,innerWidth-290),bottom=mobile?innerHeight-$('aside').getBoundingClientRect().top+14:45,top=mobile?91:65,height=Math.max(150,innerHeight-bottom-top);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,bottom,width,height);$('footer').style.bottom=(mobile?bottom+4:24)+'px';}
 window.addEventListener('resize',resize);resize();
 let lastFrame=performance.now();
-function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastFrame)/1000;lastFrame=now;if(!dalgu?.active)controls.update();dalgu?.tick(dt);cutaway();renderer.render(scene,camera);}animate();
+function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastFrame)/1000;lastFrame=now;if(tourPlaying)tickTour(dt);else if(!dalgu?.active)controls.update();dalgu?.tick(dt);cutaway();renderer.render(scene,camera);}animate();
 window.labViewer={scene,camera,renderer,controls,preset,selectModel,get mode(){return mode;},get cute(){return cute;},get scan(){return scan;},get lingbot(){return lingbot;},get gs(){return extraGS.get(gsVariant)?.mesh||(gsVariant==='surface'?surfaceGS:gs);},get gsVariant(){return gsVariant;}};
