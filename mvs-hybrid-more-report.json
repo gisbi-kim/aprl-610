@@ -1,0 +1,49 @@
+{
+  "frames": 24,
+  "confidence_threshold": 2.0,
+  "required_other_consistent_views": 1,
+  "consistency_tolerance": "max(0.05 metres, 3% camera depth)",
+  "preserves_original_mvs_mesh": true,
+  "consistent_points": 744258,
+  "overlap_before_median_m": 0.04120512154366928,
+  "global_refinement": [
+    [
+      0.9999267466945406,
+      0.011754223421754272,
+      -0.002887815198753094,
+      -0.015637085468011677
+    ],
+    [
+      -0.011766045113680769,
+      0.999922325511413,
+      -0.004111341171653267,
+      -4.556054790426352e-05
+    ],
+    [
+      0.0028392652664897293,
+      0.004145018166231077,
+      0.9999873786189241,
+      -0.019123151486652317
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "overlap_after_median_m": 0.041155452429424054,
+  "point_distance_quantiles_m": [
+    0.012249144229128657,
+    0.027558400425969184,
+    0.06196854734899243,
+    0.16514818412534715,
+    0.39032384269977866
+  ],
+  "added_points": 422571,
+  "mvs_freespace_rejected": 11327,
+  "base_faces": 299999,
+  "added_faces": 179999,
+  "total_faces": 479998,
+  "added_surface_area_m2": 50.27622550293178
+}

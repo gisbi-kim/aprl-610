@@ -1,0 +1,17 @@
+{
+  "method": "BAE tracked-point bundle followed by conservative local offset transfer and Poisson surface",
+  "ba_optimized_points": 37872,
+  "dense_output_points": 575955,
+  "dense_points_with_transferred_offset": 90242,
+  "max_transferred_offset_m": 0.040000000000000015,
+  "BA_point_movement_median_m": 0.04117514977298155,
+  "BA_point_movement_p95_m": 0.10430899263190123,
+  "accepted_BA_anchors": 33080,
+  "transfer_radius_m": 0.12,
+  "transfer_limit_m": 0.04,
+  "normal_handling": "original LingBot normals retained for conservative small offsets",
+  "all_dense_points_directly_optimized": false,
+  "poses_for_texture": "original aligned COLMAP cameras retained; shape-offset comparison",
+  "faces": 449999,
+  "texturing": "Original photos with aligned COLMAP cameras; no COLMAP points in mesh"
+}

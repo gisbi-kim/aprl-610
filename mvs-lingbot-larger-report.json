@@ -1,0 +1,33 @@
+{
+  "method": "Small simple boundary loops, local PCA projection and ear-clipping triangulation; no global smoothing",
+  "limits": {
+    "bounding_diagonal_m": 0.4,
+    "perimeter_m": 1.5,
+    "area_m2": 0.08,
+    "max_plane_deviation_m": 0.02,
+    "max_edges": 250
+  },
+  "original_faces": 449999,
+  "added_faces": 400,
+  "final_faces": 450399,
+  "boundary_edges_before": 7125,
+  "closed_loops_found": 75,
+  "holes_filled": 38,
+  "boundary_edges_closed": 476,
+  "filled_area_m2": 0.33847643909018865,
+  "skipped": {
+    "nonplanar": 15,
+    "large_opening": 17,
+    "branching_boundary": 11,
+    "too_many_edges": 5
+  },
+  "original_vertices_unchanged": true,
+  "original_faces_unchanged": true,
+  "untextured_faces_before": 156142,
+  "untextured_components": 4870,
+  "small_texture_components_eligible": 4781,
+  "texture_faces_repaired": 50270,
+  "texture_faces_remaining": 105872,
+  "texture_fill": "Nearby photo colors, similar surface normals; isolated patches <=40 cm diagonal and 0.08 square metres use <=15 cm interpolation; narrow connected defects require centroid <=18 mm and vertex interpolation <=35 mm",
+  "exported_faces": 450399
+}

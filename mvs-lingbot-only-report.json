@@ -1,0 +1,14 @@
+{
+  "frames": 24,
+  "confidence_threshold": 2.0,
+  "required_other_consistent_views": 1,
+  "consistency_tolerance": "max(0.05 metres, 3% camera depth)",
+  "preserves_original_mvs_mesh": false,
+  "consistent_points": 744258,
+  "geometry_source": "LingBot only",
+  "surface_points": 575955,
+  "mvs_points_used": 0,
+  "mvs_depth_filter": false,
+  "faces": 449999,
+  "texturing": "Original photos with aligned COLMAP cameras; no COLMAP points in mesh"
+}

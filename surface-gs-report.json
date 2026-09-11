@@ -1,0 +1,33 @@
+{
+  "step": 6000,
+  "count": 283503,
+  "surface_axis_ratio_p50_p90_p99": [
+    1.1886749267578125,
+    1.998780727386475,
+    4.469063119888304
+  ],
+  "floor_axis_ratio_gt10": 2,
+  "floor_plane_mae_m": 3.328519596834667e-05,
+  "training_view_diagnostics_not_heldout": [
+    {
+      "frame": 0,
+      "psnr_training_view": 19.633508682250977,
+      "depth_mae_m": 0.02760256454348564
+    },
+    {
+      "frame": 6,
+      "psnr_training_view": 20.398635864257812,
+      "depth_mae_m": 0.16421423852443695
+    },
+    {
+      "frame": 12,
+      "psnr_training_view": 17.88874053955078,
+      "depth_mae_m": 0.016712753102183342
+    },
+    {
+      "frame": 18,
+      "psnr_training_view": 20.597885131835938,
+      "depth_mae_m": 0.04245946183800697
+    }
+  ]
+}
