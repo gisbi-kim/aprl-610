@@ -20,7 +20,7 @@ const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStand
 const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder),roofClip=new THREE.Plane(new THREE.Vector3(0,-1,0),2.59);
 let dalgu;
 let cute,scan,lingbot,scanPromise,mapPromise,mapMaterial,mapCameraGroup,qualityValues,mode='cute',currentView='all',requestNumber=0;
-const cuteBytes=new Uint8Array(await (await fetch('model-compact.glb')).arrayBuffer());
+const cuteBytes=new Uint8Array(await (await fetch('model-compact.glb?v=monitor-arm-2')).arrayBuffer());
 function toast(msg){$('#toast').textContent=msg;$('#toast').style.display='block';setTimeout(()=>$('#toast').style.display='none',4500);}
 loader.parse(cuteBytes.buffer,'',g=>{cute=g.scene;cute.traverse(o=>{if(o.isMesh){o.castShadow=!o.name.startsWith('Carpet_');o.receiveShadow=true;if(o.material)o.material.envMapIntensity=.75;}});scene.add(cute);$('#loading').remove();document.querySelectorAll('[data-model]').forEach(b=>b.disabled=false);applyMode('cute');installDalgu(window.labViewer).then(d=>{dalgu=d;window.labViewer.dalgu=d;window.viewerReady=true;}).catch(e=>{console.error(e);toast('달구 모델을 불러오지 못했습니다. 새로고침해 주세요.');});},e=>{$('#loading').textContent='모델을 열지 못했습니다. 페이지를 새로고침해 주세요.';console.error(e);});
 const viewpoints=[...D.cameras].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
