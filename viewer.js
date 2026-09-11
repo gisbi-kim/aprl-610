@@ -185,6 +185,21 @@ function updateMapSettings(){if(!mapMaterial)return;const threshold=Number($('#c
 $('#confidence').oninput=updateMapSettings;$('#pointSize').oninput=updateMapSettings;$('#mapCameras').onchange=updateMapSettings;
 $('#cutaway').onchange=()=>{updateGSSettings();if(gsRoof)gsRoof.opacity=$('#cutaway').checked?0:1;if(hybridOverlay)hybridOverlay.traverse(o=>{if(o.isMesh){o.material.clippingPlanes=$('#cutaway').checked?[roofClip]:[];o.material.needsUpdate=true;}});if(mapMaterial)mapMaterial.uniforms.cutRoof.value=$('#cutaway').checked?1:0;if(scan)scan.traverse(o=>{if(o.isMesh){o.material.clippingPlanes=$('#cutaway').checked?[roofClip]:[];o.material.needsUpdate=true;}});};
 function cutaway(){if(!cute)return;const cut=$('#cutaway').checked,x=camera.position.x,z=camera.position.z;cute.traverse(o=>{const n=o.name;let hide=false;if(cut){if(n.startsWith('Wall_Left'))hide=x<-2.05;if(n.startsWith('Wall_Right'))hide=x>2.04;if(n.startsWith('Wall_Front')||n.startsWith('Wall_DoorHeader')||n.startsWith('Door_'))hide=z>2.96;if(n.startsWith('Window_')&&!n.startsWith('Window_Tree')&&!n.startsWith('Window_Console')&&!n.startsWith('Window_Stool'))hide=z<-2.63;if(n.startsWith('Wall_Window'))hide=z<-2.63;}if(n.startsWith('Wall_')||n.startsWith('Door_')||(n.startsWith('Window_')&&!n.startsWith('Window_Tree')&&!n.startsWith('Window_Console')&&!n.startsWith('Window_Stool')))o.visible=!hide;});}
+const embeddedViewer=window.self!==window.top;
+const menuPanel=$('aside');menuPanel.id='viewerMenu';
+const menuButton=document.createElement('button');menuButton.id='menuToggle';menuButton.setAttribute('aria-controls','viewerMenu');document.body.append(menuButton);
+let menuPinned=!embeddedViewer,menuHover=false,menuCloseTimer;
+function updateMenu(){
+ const open=menuPinned||menuHover;
+ document.body.classList.toggle('menu-collapsed',!open);document.body.classList.toggle('menu-overlay',embeddedViewer||!menuPinned);
+ menuPanel.inert=!open;menuButton.setAttribute('aria-expanded',String(open));menuButton.textContent=open?'메뉴 접기':'메뉴';
+ resize();
+}
+function previewMenu(){clearTimeout(menuCloseTimer);if(!menuPinned){menuHover=true;updateMenu();}}
+function leaveMenu(){clearTimeout(menuCloseTimer);menuCloseTimer=setTimeout(()=>{if(!menuPinned&&!menuPanel.matches(':hover')&&!menuButton.matches(':hover')&&!menuPanel.contains(document.activeElement)){menuHover=false;updateMenu();}},220);}
+menuButton.onclick=()=>{clearTimeout(menuCloseTimer);menuPinned=!menuPinned;menuHover=false;updateMenu();};
+for(const element of [menuButton,menuPanel]){element.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')previewMenu();});element.addEventListener('pointerleave',leaveMenu);}
+menuPanel.addEventListener('focusout',leaveMenu);
 const fullscreenButton=document.createElement('button');fullscreenButton.id='sceneFullscreen';fullscreenButton.textContent='전체화면';fullscreenButton.setAttribute('aria-pressed','false');document.body.append(fullscreenButton);
 let expandedScene=false;
 function setExpanded(value){expandedScene=value;document.body.classList.toggle('scene-expanded',value);fullscreenButton.textContent=value?'전체화면 닫기':'전체화면';fullscreenButton.setAttribute('aria-pressed',String(value));resize();}
@@ -195,8 +210,8 @@ fullscreenButton.onclick=async()=>{
 };
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement)setExpanded(false);});
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&expandedScene&&!document.fullscreenElement)setExpanded(false);});
-function resize(){if(expandedScene){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,0,innerWidth,innerHeight);return;}const mobile=innerWidth<=720,width=mobile?innerWidth:Math.max(300,innerWidth-290),bottom=mobile?innerHeight-$('aside').getBoundingClientRect().top+14:45,top=Math.ceil($('header').getBoundingClientRect().bottom)+(mobile?12:18),height=Math.max(150,innerHeight-bottom-top);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,bottom,width,height);$('footer').style.bottom=(mobile?bottom+4:24)+'px';}
-window.addEventListener('resize',resize);new ResizeObserver(resize).observe($('header'));resize();
+function resize(){if(expandedScene){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,0,innerWidth,innerHeight);return;}const mobile=innerWidth<=720,width=(mobile||embeddedViewer||!menuPinned)?innerWidth:Math.max(300,innerWidth-290),bottom=(mobile&&menuPinned&&!embeddedViewer)?innerHeight-$('aside').getBoundingClientRect().top+14:45,top=Math.ceil($('header').getBoundingClientRect().bottom)+(mobile?12:18),height=Math.max(150,innerHeight-bottom-top);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,bottom,width,height);$('footer').style.bottom=(mobile?bottom+4:24)+'px';}
+updateMenu();window.addEventListener('resize',resize);new ResizeObserver(resize).observe($('header'));resize();
 let lastFrame=performance.now();
 function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastFrame)/1000;lastFrame=now;if(tourPlaying)tickTour(dt);else if(!dalgu?.active)controls.update();dalgu?.tick(dt);cutaway();renderer.render(scene,camera);}animate();
 window.labViewer={scene,camera,renderer,controls,preset,selectModel,get mode(){return mode;},get cute(){return cute;},get scan(){return scan;},get lingbot(){return lingbot;},get gs(){return extraGS.get(gsVariant)?.mesh||(gsVariant==='surface'?surfaceGS:gs);},get gsVariant(){return gsVariant;}};
