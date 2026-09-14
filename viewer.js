@@ -1,11 +1,14 @@
 import { MeshoptDecoder } from './vendor/meshopt_decoder.mjs';
+import { installMonitorHome } from './monitor-home.js?v=fa471168d53e';
+import { installTV } from './tv.js?v=0b8a98fec3df';
+import { installFridge } from './fridge.js?v=6a14d5c0fdb7';
 import { installDalgu } from './dalgu.js?v=platform-jump-2';
 import * as THREE from './vendor/three.module.js';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { GLTFLoader } from './vendor/GLTFLoader.js';
 const D=window.CUTE_LAB,$=s=>document.querySelector(s),names={cute:'3D 모델',scan:'MVS',lingbot:'Pointcloud',gs:'GS'};
 document.querySelector('#pointSize').value='5';document.querySelector('#pointSizeValue').textContent='5';
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.setSize(innerWidth,innerHeight);renderer.setClearColor(0xecebe5);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.91;
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.localClippingEnabled=true;$('#canvas').appendChild(renderer.domElement);
 const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(36,innerWidth/innerHeight,.03,150);
@@ -18,11 +21,11 @@ for(const [at,size,col] of [[[0,6,0],[8,.1,8],0xffffff],[[-8,2,0],[.1,9,8],0xf2e
 const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(envScene,.08).texture;pmrem.dispose();
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0xecebe5,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.218;ground.receiveShadow=true;scene.add(ground);
 const loader=new GLTFLoader().setMeshoptDecoder(MeshoptDecoder),roofClip=new THREE.Plane(new THREE.Vector3(0,-1,0),2.59);
-let dalgu;
+let dalgu,fridge,tv,monitorHome;
 let cute,scan,lingbot,scanPromise,mapPromise,mapMaterial,mapCameraGroup,qualityValues,mode='cute',currentView='all',requestNumber=0;
 const cuteBytes=new Uint8Array(await (await fetch('model-compact.glb?v=3719bc9ed116')).arrayBuffer());
 function toast(msg){$('#toast').textContent=msg;$('#toast').style.display='block';setTimeout(()=>$('#toast').style.display='none',4500);}
-loader.parse(cuteBytes.buffer,'',g=>{cute=g.scene;cute.traverse(o=>{if(o.isMesh){o.castShadow=!o.name.startsWith('Carpet_');o.receiveShadow=true;if(o.material)o.material.envMapIntensity=.75;}});scene.add(cute);$('#loading').remove();document.querySelectorAll('[data-model]').forEach(b=>b.disabled=false);applyMode('cute');installDalgu(window.labViewer).then(d=>{dalgu=d;window.labViewer.dalgu=d;window.viewerReady=true;}).catch(e=>{console.error(e);toast('달구 모델을 불러오지 못했습니다. 새로고침해 주세요.');});},e=>{$('#loading').textContent='모델을 열지 못했습니다. 페이지를 새로고침해 주세요.';console.error(e);});
+loader.parse(cuteBytes.buffer,'',g=>{cute=g.scene;cute.traverse(o=>{if(o.isMesh){o.castShadow=!o.name.startsWith('Carpet_');o.receiveShadow=true;if(o.material)o.material.envMapIntensity=.75;}});scene.add(cute);fridge=installFridge(window.labViewer);tv=installTV(window.labViewer,toast);monitorHome=installMonitorHome(window.labViewer);$('#loading').remove();document.querySelectorAll('[data-model]').forEach(b=>b.disabled=false);applyMode('cute');installDalgu(window.labViewer).then(d=>{dalgu=d;window.labViewer.dalgu=d;window.viewerReady=true;}).catch(e=>{console.error(e);toast('달구 모델을 불러오지 못했습니다. 새로고침해 주세요.');});},e=>{$('#loading').textContent='모델을 열지 못했습니다. 페이지를 새로고침해 주세요.';console.error(e);});
 const viewpoints=[...D.cameras].sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true}));
 let viewIndex=Math.max(0,viewpoints.findIndex(c=>c.name==='14.jpg'));
 let tourPlaying=false,tourElapsed=0,tourDestination=0,tourFromPosition=new THREE.Vector3(),tourFromQuaternion=new THREE.Quaternion(),tourFromFov=36;
@@ -213,5 +216,5 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&expandedScene&&!docum
 function resize(){if(expandedScene){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,0,innerWidth,innerHeight);return;}const mobile=innerWidth<=720,width=(mobile||embeddedViewer||!menuPinned)?innerWidth:Math.max(300,innerWidth-290),bottom=(mobile&&menuPinned&&!embeddedViewer)?innerHeight-$('aside').getBoundingClientRect().top+14:45,top=Math.ceil($('header').getBoundingClientRect().bottom)+(mobile?12:18),height=Math.max(150,innerHeight-bottom-top);camera.aspect=width/height;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setViewport(0,bottom,width,height);$('footer').style.bottom=(mobile?bottom+4:24)+'px';}
 updateMenu();window.addEventListener('resize',resize);new ResizeObserver(resize).observe($('header'));resize();
 let lastFrame=performance.now();
-function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastFrame)/1000;lastFrame=now;if(tourPlaying)tickTour(dt);else if(!dalgu?.active)controls.update();dalgu?.tick(dt);cutaway();renderer.render(scene,camera);}animate();
-window.labViewer={scene,camera,renderer,controls,preset,selectModel,get mode(){return mode;},get cute(){return cute;},get scan(){return scan;},get lingbot(){return lingbot;},get gs(){return extraGS.get(gsVariant)?.mesh||(gsVariant==='surface'?surfaceGS:gs);},get gsVariant(){return gsVariant;}};
+function animate(){requestAnimationFrame(animate);const now=performance.now(),dt=(now-lastFrame)/1000;lastFrame=now;if(tourPlaying)tickTour(dt);else if(!dalgu?.active)controls.update();dalgu?.tick(dt);fridge?.tick(dt);cutaway();tv?.tick(dt);monitorHome?.tick(dt);renderer.render(scene,camera);}animate();
+window.labViewer={scene,camera,renderer,controls,preset,selectModel,get mode(){return mode;},get cute(){return cute;},get fridge(){return fridge;},get tv(){return tv;},get monitorHome(){return monitorHome;},get scan(){return scan;},get lingbot(){return lingbot;},get gs(){return extraGS.get(gsVariant)?.mesh||(gsVariant==='surface'?surfaceGS:gs);},get gsVariant(){return gsVariant;}};
