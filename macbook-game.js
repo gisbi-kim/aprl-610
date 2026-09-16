@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three.module.js';
 import {screenLayerRoot,orderScreenLayer} from './screen-layers.js';
 
-export const GAME_URL='https://aprl-turtle-mapper.giseopkim.chatgpt.site/';
+export const GAME_URL='https://gisbi-kim.github.io/turtle-mapper/';
 const GAME_ORIGIN=new URL(GAME_URL).origin;
 const GAME_KEYS=new Set(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','KeyP','KeyR','KeyL','Enter','Escape']);
 

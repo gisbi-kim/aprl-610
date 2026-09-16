@@ -1,5 +1,5 @@
 import * as THREE from './vendor/three.module.js';
-import {installMacBookGame} from './macbook-game.js?v=turtle-1';
+import {installMacBookGame} from './macbook-game.js?v=github-2';
 
 export function installMacBook(viewer) {
   const {cute, camera, renderer} = viewer;
