@@ -1,4 +1,4 @@
-import { installMacBook } from './macbook.js?v=macbook-motion-2';
+import { installMacBook } from './macbook.js?v=macbook-game-1';
 import { installClothingLinks } from './clothing-links.js?v=c810c98ae64d';
 import { MeshoptDecoder } from './vendor/meshopt_decoder.mjs';
 import { installMonitorHome } from './monitor-home.js?v=fa471168d53e';

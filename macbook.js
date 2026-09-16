@@ -1,4 +1,5 @@
 import * as THREE from './vendor/three.module.js';
+import {installMacBookGame} from './macbook-game.js?v=turtle-1';
 
 export function installMacBook(viewer) {
   const {cute, camera, renderer} = viewer;
@@ -87,6 +88,7 @@ export function installMacBook(viewer) {
   Object.assign(button.style,{position:'fixed',left:'24px',top:'174px',zIndex:'5',padding:'9px 14px',fontSize:'12px',background:'#fffffff0',boxShadow:'0 2px 12px #30403820'});
   document.body.append(button);
   let opened=false, angle=0;
+  const game=installMacBookGame(viewer,screen,()=>Math.abs(angle)>.1);
   function toggle() {
     if (viewer.mode!=='cute' || document.pointerLockElement) return;
     opened=!opened;
@@ -127,7 +129,7 @@ export function installMacBook(viewer) {
   canvas.addEventListener('pointercancel',e=>{pointers.delete(e.pointerId);down=null;});
   const anchor=base.getWorldPosition(new THREE.Vector3()), projected=new THREE.Vector3();
   return {
-    toggle, hinge, frame, screen, interior,
+    toggle, hinge, frame, screen, interior, game,
     get opened(){return opened;}, get angle(){return angle;},
     tick(dt) {
       const target=opened?-THREE.MathUtils.degToRad(110):0;
@@ -136,6 +138,7 @@ export function installMacBook(viewer) {
       if(Math.abs(angle-target)<.0001)angle=target;
       hinge.rotation.x=angle;
       interior.visible=screenBack.visible=screen.visible=Math.abs(angle)>.025;
+      game.tick(dt);
       const korean=document.documentElement.lang.startsWith('ko');
       const label=korean?(opened?'맥북 닫기':'맥북 열기'):(opened?'Close MacBook':'Open MacBook');
       if(button.textContent!==label)button.textContent=label;
