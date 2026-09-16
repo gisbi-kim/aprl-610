@@ -86,7 +86,6 @@ export function installMacBook(viewer) {
   button.setAttribute('aria-expanded','false');
   Object.assign(button.style,{position:'fixed',left:'24px',top:'174px',zIndex:'5',padding:'9px 14px',fontSize:'12px',background:'#fffffff0',boxShadow:'0 2px 12px #30403820'});
   document.body.append(button);
-  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   let opened=false, angle=0;
   function toggle() {
     if (viewer.mode!=='cute' || document.pointerLockElement) return;
@@ -132,7 +131,8 @@ export function installMacBook(viewer) {
     get opened(){return opened;}, get angle(){return angle;},
     tick(dt) {
       const target=opened?-THREE.MathUtils.degToRad(110):0;
-      angle=reducedMotion.matches?target:THREE.MathUtils.damp(angle,target,8,Math.min(dt,.05));
+      // Keep this user-triggered hinge motion continuous on every device.
+      angle=THREE.MathUtils.damp(angle,target,8,Math.min(dt,.05));
       if(Math.abs(angle-target)<.0001)angle=target;
       hinge.rotation.x=angle;
       interior.visible=screenBack.visible=screen.visible=Math.abs(angle)>.025;
